@@ -1,1 +1,1 @@
-Onboarding webapp for KioskOS
+Onboarding local webapp for KioskOS
