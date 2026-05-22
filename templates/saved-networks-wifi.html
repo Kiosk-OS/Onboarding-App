@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+  <title>KioskOS Saved Networks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <div class="steps">
+      <div class="step done">Welcome</div>
+      <div class="step done">Device</div>
+      <div class="step done">Time</div>
+      <div class="step active">Network</div>
+      <div class="step">SSH</div>
+    </div>
+    <a href="/network" class="back-link">← Back</a>
+    <nav>
+    <a href="/wifi" class="nav-button">Connect</a>
+    <a href="/saved-networks-wifi" class="nav-button active">Saved Networks</a>
+  </nav>
+
+    <section class="card">
+      <h1>Saved Networks</h1>
+
+      {% if error %}
+        <div class="message">{{ error }}</div>
+      {% endif %}
+
+      {% if saved %}
+        {% for c in saved %}
+          <form method="post" action="/forget" class="saved-row">
+            <span>{{ c.id }}</span>
+            <input type="hidden" name="path" value="{{ c.path }}">
+            <button type="submit" class="small danger">Forget</button>
+          </form>
+        {% endfor %}
+      {% else %}
+        <p>No saved Wi-Fi networks.</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

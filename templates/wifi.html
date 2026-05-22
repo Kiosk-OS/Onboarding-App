@@ -1,0 +1,203 @@
+<!doctype html>
+<html>
+<head>
+  <title>KioskOS Wi-Fi Setup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <div class="steps">
+      <div class="step done">Welcome</div>
+      <div class="step done">Device</div>
+      <div class="step done">Time</div>
+      <div class="step active">Network</div>
+      <div class="step">SSH</div>
+    </div>
+
+    <a href="/network" class="back-link">← Back</a>
+
+    <nav>
+      <a href="/wifi" class="nav-button active">Connect</a>
+      <a href="/saved-networks-wifi" class="nav-button">Saved Networks</a>
+    </nav>
+
+    <section class="card">
+      <h1>Wi-Fi Setup</h1>
+
+      <div id="message" class="message" {% if not error %}hidden{% endif %}>
+        {{ error or "" }}
+      </div>
+
+      <form id="wifi-form">
+        <label>Network</label>
+        <select id="ssid" name="ssid" required>
+          {% for n in networks %}
+            <option value="{{ n.ssid }}">{{ n.ssid }} — {{ n.strength }}%</option>
+          {% endfor %}
+        </select>
+
+        <button id="refresh-networks" type="button" class="secondary-action compact-action">
+          Scan again
+        </button>
+
+        <label>Password</label>
+        <div class="password-row">
+          <input id="password" name="password" type="password" autocomplete="current-password">
+          <button id="toggle-password" type="button" class="side-button">Show</button>
+        </div>
+
+        <button id="connect-button" type="submit">Connect</button>
+        <a href="/network" class="secondary-action">Choose another network option</a>
+        <a href="/ssh" class="secondary-action">Skip Wi-Fi</a>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById("wifi-form");
+    const message = document.getElementById("message");
+    const button = document.getElementById("connect-button");
+    const password = document.getElementById("password");
+    const togglePassword = document.getElementById("toggle-password");
+    const ssidSelect = document.getElementById("ssid");
+    const refreshNetworks = document.getElementById("refresh-networks");
+    const wifiEnabled = {{ "true" if wifi_enabled else "false" }};
+    const autoScan = new URLSearchParams(window.location.search).get("scan") === "1";
+
+    function showMessage(text) {
+      message.hidden = false;
+      message.textContent = text;
+    }
+
+    function renderNetworks(networks) {
+      ssidSelect.innerHTML = "";
+
+      for (const network of networks) {
+        const option = document.createElement("option");
+        option.value = network.ssid;
+        option.textContent = `${network.ssid} — ${network.strength}%`;
+        ssidSelect.appendChild(option);
+      }
+    }
+
+    async function scanNetworks() {
+      refreshNetworks.disabled = true;
+      refreshNetworks.textContent = "Scanning...";
+      showMessage("Scanning for Wi-Fi networks...");
+
+      let lastError = null;
+
+      for (let attempt = 1; attempt <= 5; attempt++) {
+        const response = await fetch("/scan-wifi");
+        const data = await response.json();
+
+        if (data.status === "error") {
+          lastError = data.error || "Could not scan networks.";
+        } else {
+          renderNetworks(data.networks);
+
+          if (data.networks.length) {
+            showMessage("Networks updated.");
+            refreshNetworks.disabled = false;
+            refreshNetworks.textContent = "Scan again";
+            return;
+          }
+        }
+
+        showMessage(`Scanning for Wi-Fi networks... ${attempt}/5`);
+        await new Promise(resolve => setTimeout(resolve, 1200));
+      }
+
+      showMessage(lastError || "No networks found. Make sure Wi-Fi is in range, then scan again.");
+
+      refreshNetworks.disabled = false;
+      refreshNetworks.textContent = "Scan again";
+    }
+
+    togglePassword.addEventListener("click", () => {
+      const isVisible = password.type === "text";
+      password.type = isVisible ? "password" : "text";
+      togglePassword.textContent = isVisible ? "Show" : "Hide";
+    });
+
+    refreshNetworks.addEventListener("click", scanNetworks);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const ssid = formData.get("ssid");
+
+      if (!ssid) {
+        showMessage("Choose a Wi-Fi network first.");
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Connecting...";
+      showMessage("Connecting...");
+
+      const connectResponse = await fetch("/connect", {
+        method: "POST",
+        body: formData
+      });
+
+      const connectData = await connectResponse.json();
+      showMessage(connectData.message);
+
+      if (connectData.status === "error") {
+        button.disabled = false;
+        button.textContent = "Connect";
+        return;
+      }
+
+      let attempts = 0;
+      const timer = setInterval(async () => {
+        attempts += 1;
+
+        const statusResponse = await fetch(`/status?ssid=${encodeURIComponent(ssid)}`);
+        const statusData = await statusResponse.json();
+
+        showMessage(statusData.message);
+
+        if (statusData.status === "connected") {
+          clearInterval(timer);
+          showMessage("Connected successfully.");
+          window.location.href = "/ssh";
+          return;
+        }
+
+        if (statusData.status === "error" || attempts >= 20) {
+          clearInterval(timer);
+          button.disabled = false;
+          button.textContent = "Connect";
+
+          if (attempts >= 20 && statusData.status === "connecting") {
+            showMessage("Wi-Fi connection failed. Make sure the password is correct, the router is online, and the signal is strong, then try again.");
+          }
+        }
+      }, 1000);
+    });
+
+    window.addEventListener("load", async () => {
+      if (!wifiEnabled) {
+        showMessage("Wi-Fi is disabled. Go back and choose Wi-Fi to enable wireless scanning.");
+        return;
+      }
+
+      if (autoScan) {
+        await scanNetworks();
+        window.history.replaceState({}, "", "/wifi");
+        return;
+      }
+
+      if (ssidSelect.options.length) {
+        showMessage("Choose a Wi-Fi network, or scan again to refresh.");
+      } else {
+        showMessage("No cached networks. Click Scan again to search.");
+      }
+    });
+  </script>
+</body>
+</html>

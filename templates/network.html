@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+  <title>KioskOS Network</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <div class="steps">
+      <div class="step done">Welcome</div>
+      <div class="step done">Device</div>
+      <div class="step done">Time</div>
+      <div class="step active">Network</div>
+      <div class="step">SSH</div>
+    </div>
+
+    <a href="/timezone" class="back-link">← Back</a>
+
+    <section class="card">
+      <h1>Network</h1>
+
+      {% if error %}
+        <div class="message">{{ error }}</div>
+      {% endif %}
+
+      <p>Choose how this device should connect to the network.</p>
+
+      <form method="post" action="/network/ethernet">
+        <button type="submit">Use Ethernet</button>
+      </form>
+
+      <form method="post" action="/network/wifi">
+        <button type="submit" class="secondary-action">Use Wi-Fi</button>
+      </form>
+
+      <p class="hint">
+        Ethernet does not enable or scan Wi-Fi. Wi-Fi will turn on the wireless radio and scan for networks.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

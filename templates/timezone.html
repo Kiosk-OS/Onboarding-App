@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+  <title>KioskOS Timezone</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <div class="steps">
+      <div class="step done">Welcome</div>
+      <div class="step done">Device</div>
+      <div class="step active">Time</div>
+      <div class="step">Network</div>
+      <div class="step">SSH</div>
+     </div>
+    <a href="/device" class="back-link">← Back</a>
+    <section class="card">
+      <h1>Set timezone</h1>
+
+      {% if error %}
+        <div class="message">{{ error }}</div>
+      {% endif %}
+
+      <form method="post" action="/timezone">
+        <label>Search timezone</label>
+        <input id="timezone-search" type="search" placeholder="Search city or timezone">
+
+        <label>Timezone</label>
+        <select id="timezone-select" name="timezone" required>
+          {% for tz in timezones %}
+            <option
+              value="{{ tz.value }}"
+              data-search="{{ tz.search }}"
+              {% if tz.value == selected_timezone %}selected{% endif %}
+            >
+              {{ tz.label }}
+            </option>
+          {% endfor %}
+        </select>
+
+        <button type="submit">Continue</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const search = document.getElementById("timezone-search");
+    const select = document.getElementById("timezone-select");
+    const allOptions = Array.from(select.options).map(option => ({
+      value: option.value,
+      text: option.textContent,
+      search: option.dataset.search,
+      selected: option.selected
+    }));
+
+    search.addEventListener("input", () => {
+      const query = search.value.trim().toLowerCase();
+
+      select.innerHTML = "";
+
+      allOptions
+        .filter(option => option.search.includes(query))
+        .forEach(option => {
+          const el = document.createElement("option");
+          el.value = option.value;
+          el.textContent = option.text;
+          el.dataset.search = option.search;
+          el.selected = option.selected && !query;
+          select.appendChild(el);
+        });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+  <title>KioskOS Device Name</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <div class="steps">
+      <div class="step done">Welcome</div>
+      <div class="step active">Device</div>
+      <div class="step">Time</div>
+      <div class="step">Network</div>
+      <div class="step">SSH</div>
+    </div>
+    <a href="/welcome" class="back-link">← Back</a>
+    <section class="card">
+      <h1>Name this device</h1>
+
+      {% if error %}
+        <div class="message">{{ error }}</div>
+      {% endif %}
+
+      <form method="post" action="/device">
+        <label>Device name</label>
+        <input name="hostname" value="{{ hostname }}" required>
+
+        <button type="submit">Continue</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

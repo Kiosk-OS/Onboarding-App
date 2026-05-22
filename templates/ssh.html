@@ -1,0 +1,210 @@
+<!doctype html>
+<html>
+<head>
+  <title>KioskOS Remote Access</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <div class="steps">
+      <div class="step done">Welcome</div>
+      <div class="step done">Device</div>
+      <div class="step done">Time</div>
+      <div class="step done">Network</div>
+      <div class="step active">SSH</div>
+    </div>
+
+    <a href="/network" class="back-link">← Back</a>
+
+    <section class="card">
+      <h1>Remote Access</h1>
+
+      {% if error %}
+        <div class="message">{{ error }}</div>
+      {% endif %}
+
+      <form id="ssh-form" method="post" action="/ssh">
+        <label class="checkbox-row">
+          <span>Enable SSH remote access</span>
+          <input
+            id="enable-ssh"
+            type="checkbox"
+            name="enable_ssh"
+            {% if ssh_enabled %}checked{% endif %}
+          >
+        </label>
+
+        <p>
+          SSH allows secure remote access for troubleshooting, maintenance, and advanced setup.
+          If you enable SSH, use a strong password.
+        </p>
+
+        <div id="ssh-password-section" {% if not ssh_enabled %}hidden{% endif %}>
+          <label>SSH password</label>
+
+          <div class="password-row">
+            <input
+              id="ssh-password"
+              name="ssh_password"
+              type="password"
+              autocomplete="new-password"
+              value="{{ ssh_password or '' }}"
+              placeholder="{% if ssh_enabled %}Leave blank to keep current password{% else %}Required to enable SSH{% endif %}"
+            >
+            <button id="toggle-password" type="button" class="side-button">Show</button>
+          </div>
+
+          {% if weak_password %}
+            <label id="risk-row" class="risk-row">
+              <input id="accept-weak" type="checkbox" name="accept_weak_password" required>
+              <span>I understand the risk and want to use this password.</span>
+            </label>
+          {% endif %}
+
+          <button id="generate-password" type="button" class="secondary-action">
+            Generate secure password
+          </button>
+
+          <p id="generated-note" hidden>
+            Save this password somewhere safe. It will not be shown again after setup.
+          </p>
+        </div>
+
+        <button type="submit">Continue</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const sshWasEnabled = {{ "true" if ssh_enabled else "false" }};
+    const form = document.getElementById("ssh-form");
+    const enableSsh = document.getElementById("enable-ssh");
+    const section = document.getElementById("ssh-password-section");
+    const password = document.getElementById("ssh-password");
+    const togglePassword = document.getElementById("toggle-password");
+    const generatePassword = document.getElementById("generate-password");
+    const generatedNote = document.getElementById("generated-note");
+    const riskRow = document.getElementById("risk-row");
+    const acceptWeak = document.getElementById("accept-weak");
+
+    function updateRequiredState() {
+      password.required = enableSsh.checked && !sshWasEnabled;
+    }
+
+    function clearWeakPasswordWarning() {
+      if (riskRow) {
+        riskRow.hidden = true;
+      }
+
+      if (acceptWeak) {
+        acceptWeak.required = false;
+        acceptWeak.checked = false;
+      }
+    }
+
+    updateRequiredState();
+
+    enableSsh.addEventListener("change", () => {
+      section.hidden = !enableSsh.checked;
+      updateRequiredState();
+    });
+
+    password.addEventListener("input", clearWeakPasswordWarning);
+
+    togglePassword.addEventListener("click", () => {
+      const visible = password.type === "text";
+      password.type = visible ? "password" : "text";
+      togglePassword.textContent = visible ? "Show" : "Hide";
+    });
+
+    function estimateEntropyBits(value) {
+      if (!value) {
+        return 0;
+      }
+
+      let pool = 0;
+
+      if (/[a-z]/.test(value)) {
+        pool += 26;
+      }
+
+      if (/[A-Z]/.test(value)) {
+        pool += 26;
+      }
+
+      if (/[0-9]/.test(value)) {
+        pool += 10;
+      }
+
+      if (/[^A-Za-z0-9]/.test(value)) {
+        pool += 32;
+      }
+
+      if (pool === 0) {
+        return 0;
+      }
+
+      return Math.round(value.length * Math.log2(pool));
+    }
+
+    function ensureWeakPasswordAcceptance() {
+      let accepted = form.querySelector('input[name="accept_weak_password"][value="on"]');
+
+      if (!accepted) {
+        accepted = document.createElement("input");
+        accepted.type = "hidden";
+        accepted.name = "accept_weak_password";
+        accepted.value = "on";
+        form.appendChild(accepted);
+      }
+    }
+
+    form.addEventListener("submit", (event) => {
+      if (!enableSsh.checked) {
+        return;
+      }
+
+      const value = password.value || "";
+
+      if (!value) {
+        return;
+      }
+
+      const entropy = estimateEntropyBits(value);
+
+      if (entropy >= 50) {
+        return;
+      }
+
+      const ok = window.confirm(
+        `This SSH password looks weak. Estimated strength: ${entropy} bits.\n\n` +
+        "Weak SSH passwords can allow unauthorized remote access.\n\n" +
+        "Continue anyway?"
+      );
+
+      if (!ok) {
+        event.preventDefault();
+        enableSsh.checked = true;
+        section.hidden = false;
+        password.focus();
+        return;
+      }
+
+      ensureWeakPasswordAcceptance();
+    });
+
+    generatePassword.addEventListener("click", async () => {
+      const response = await fetch("/generate-ssh-password");
+      const data = await response.json();
+
+      password.type = "text";
+      password.value = data.password;
+      togglePassword.textContent = "Hide";
+      generatedNote.hidden = false;
+
+      clearWeakPasswordWarning();
+    });
+  </script>
+</body>
+</html>

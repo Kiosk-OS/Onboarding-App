@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <title>KioskOS Setup Complete</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <div class="steps">
+      <div class="step done">Welcome</div>
+      <div class="step done">Device</div>
+      <div class="step done">Time</div>
+      <div class="step done">Network</div>
+      <div class="step done">SSH</div>
+    </div>
+    <a href="/ssh" class="back-link">← Back</a>
+    <section class="card">
+      <h1>Setup Complete</h1>
+
+      {% if error %}
+        <div class="message">{{ error }}</div>
+      {% endif %}
+
+      {% if complete %}
+        <p>KioskOS setup is complete. Reboot to apply everything cleanly.</p>
+
+        <form method="post" action="/reboot">
+          <button type="submit">Reboot Now</button>
+        </form>
+      {% else %}
+        <p>Your device is ready.</p>
+
+        <form method="post" action="/finish">
+          <button type="submit">Finish Setup</button>
+        </form>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

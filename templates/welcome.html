@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+  <title>KioskOS Welcome</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <div class="steps">
+      <div class="step active">Welcome</div>
+      <div class="step">Device</div>
+      <div class="step">Time</div>
+      <div class="step">Network</div>
+      <div class="step">SSH</div>
+    </div>
+    <section class="card">
+      <h1>Welcome to KioskOS</h1>
+
+      <div class="info-grid">
+        <div>
+          <strong>Device</strong>
+          <span>{{ info.model }}</span>
+        </div>
+
+        <div>
+          <strong>CPU</strong>
+           <span>{{ info.cpu_threads }} logical CPUs</span>
+        </div>
+
+        <div>
+          <strong>Memory</strong>
+          <span>{{ info.ram }}</span>
+        </div>
+
+        <div>
+          <strong>Hostname</strong>
+          <span>{{ info.hostname }}</span>
+        </div>
+      </div>
+
+      <p>This hardware information is detected automatically.</p>
+
+      <a href="/device" class="big-action">Looks Good</a>
+    </section>
+  </main>
+</body>
+</html>
