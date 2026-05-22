@@ -1,0 +1,268 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #050505;
+  color: white;
+  font-family: Cantarell, "Noto Sans", system-ui, sans-serif !important;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4vw, 64px);
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: Cantarell, "Noto Sans", system-ui, sans-serif !important;
+}
+
+main {
+  width: min(920px, 100%);
+  display: grid;
+  gap: clamp(18px, 3vw, 32px);
+}
+
+nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.nav-button {
+  display: grid;
+  place-items: center;
+  background: #151515;
+  color: white;
+  text-decoration: none;
+  border: 1px solid #333;
+  border-radius: 18px;
+  padding: 18px 22px;
+  font-weight: 800;
+  font-size: clamp(16px, 2vw, 24px);
+}
+
+.nav-button.active {
+  background: white;
+  color: black;
+}
+
+.password-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+}
+
+.side-button {
+  width: auto;
+  margin: 0;
+  padding-inline: 22px;
+}
+
+.card {
+  background: #111;
+  border: 1px solid #252525;
+  border-radius: clamp(18px, 2vw, 32px);
+  padding: clamp(24px, 5vw, 64px);
+}
+
+h1 {
+  font-size: clamp(34px, 6vw, 76px);
+  line-height: 1;
+  margin: 0 0 clamp(28px, 4vw, 56px);
+}
+
+h2 {
+  font-size: clamp(24px, 3vw, 40px);
+  margin: 0 0 20px;
+}
+
+label {
+  display: block;
+  margin: clamp(18px, 3vw, 32px) 0 10px;
+  color: #aaa;
+  font-size: clamp(16px, 2vw, 24px);
+}
+
+select, input, button {
+  width: 100%;
+  font-size: clamp(18px, 2.5vw, 32px);
+  padding: clamp(14px, 2.5vw, 26px);
+  border-radius: clamp(12px, 1.6vw, 22px);
+  border: 1px solid #333;
+}
+
+button {
+  margin-top: clamp(22px, 3vw, 40px);
+  background: white;
+  color: black;
+  font-weight: 800;
+}
+
+.message {
+  background: #222;
+  padding: 16px;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  font-size: clamp(16px, 2vw, 24px);
+}
+
+.saved-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.saved-row span {
+  font-size: clamp(18px, 2vw, 28px);
+  overflow-wrap: anywhere;
+}
+
+button.small {
+  width: auto;
+  margin: 0;
+  font-size: clamp(14px, 1.5vw, 20px);
+  padding: 12px 18px;
+}
+
+button.danger {
+  background: #ffdddd;
+  color: #350000;
+}
+
+p {
+  color: #aaa;
+  font-size: clamp(16px, 2vw, 24px);
+}
+
+.info-grid {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.info-grid div {
+  display: grid;
+  gap: 6px;
+  background: #181818;
+  border: 1px solid #2b2b2b;
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.info-grid strong {
+  color: #aaa;
+  font-size: clamp(14px, 1.6vw, 20px);
+}
+
+.info-grid span {
+  font-size: clamp(18px, 2.5vw, 30px);
+}
+
+.big-action {
+  display: grid;
+  place-items: center;
+  background: white;
+  color: black;
+  text-decoration: none;
+  border-radius: 18px;
+  padding: 20px;
+  font-weight: 900;
+  font-size: clamp(18px, 2.5vw, 30px);
+}
+
+.secondary-action {
+  display: grid;
+  place-items: center;
+  background: #151515;
+  color: white;
+  text-decoration: none;
+  border: 1px solid #333;
+  border-radius: 18px;
+  padding: 18px 22px;
+  margin-top: 14px;
+  font-weight: 800;
+  font-size: clamp(16px, 2vw, 24px);
+}
+
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.step {
+  height: 12px;
+  border-radius: 999px;
+  background: #333;
+  font-size: 0;
+}
+
+.step.done {
+  background: #35d07f;
+}
+
+.step.active {
+  background: white;
+}
+
+input[type="checkbox"] {
+  width: auto;
+}
+
+.hint {
+  margin-top: 10px;
+  font-size: clamp(14px, 1.6vw, 20px);
+  color: #888;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  width: fit-content;
+
+  padding: 10px 16px;
+  border-radius: 14px;
+
+  background: #181818;
+  border: 1px solid #333;
+
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: clamp(14px, 1.8vw, 20px);
+}
+
+.back-link:hover {
+  background: #222;
+  border-color: #444;
+}
+
+.risk-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: #ffdddd;
+  margin-top: 14px;
+}
+
+.risk-row input {
+  width: 28px;
+  height: 28px;
+}
+
+.compact-action {
+  width: auto;
+  justify-self: start;
+  padding: 12px 18px;
+  font-size: clamp(14px, 1.6vw, 20px);
+  margin-top: 12px;
+}
